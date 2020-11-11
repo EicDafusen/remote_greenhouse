@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 
 
-mongoose.connect('mongodb://admin:123wer@ds263876.mlab.com:63876/sera',()=>{
+mongoose.connect('mongodb://***:***@ds263876.mlab.com:63876/sera',()=>{
 	console.log('connectted to mongodb');
 },{ useNewUrlParser: true });
 
