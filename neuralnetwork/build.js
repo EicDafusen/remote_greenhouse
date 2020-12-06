@@ -1,6 +1,7 @@
 const brain = require("brain.js");
 var fs = require('fs');
 
+
 const config = {
     binaryThresh: 0.5,
     hiddenLayers: [3],     // array of ints for the sizes of the hidden layers in the network
@@ -10,20 +11,16 @@ const config = {
 
 const network = new brain.NeuralNetwork(config);
 
-//var traindata = JSON.parse(fs.readFileSync('./traindata.json', 'utf8'));
-//network.train(traindata);
-
 var obj = JSON.parse(fs.readFileSync('./neuralnetwork/myjsonfile.json', 'utf8'));
 network.fromJSON(obj);
 
+
+
 var calcAngle = (temp,humid) => {
-
-    var output =  network.run([0.01*temp,0.01*humid])
-    console.log(output + ""+temp +""+ humid )
-    output.toString();
-
-    return output.toString().slice(2,4);
     
+    var output =  network.run([0.01*temp,0.01*humid])
+    output.toString();
+    return output.toString().slice(2,4);
 }
 
 
