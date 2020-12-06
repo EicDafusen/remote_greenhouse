@@ -1,6 +1,5 @@
 var express = require('express')
 var bodyParser = require('body-parser')
-
 var fonks = require('./fonksiyonlar')
 
 
@@ -8,10 +7,6 @@ var {db}   = require('./db/connection');
 var {HavaDurumu} = require('./db/HavaDurumu');
 var neuralnetwork   = require('./neuralnetwork/build');
 
-
-
-
-// 200 HER ZAMAN GERI DONULMELI
 
 var degerler = {
 	temp: 0,
@@ -66,46 +61,24 @@ app.get('/led/:status',(req,res)=>{
 		ledStatus = 0;
 	}
 
-	res.status(200).send("2321");
+	res.status(200).send("");
 
 });
 
 
-
-/** Sıcaklığı Alıp Time Stample Kaydetme */
+// Sensör verilerini alan endpoint
 app.get('/degerler/:sicaklik/:nem',(req,res)=>{
 
-	
+	//Değelere time stamp ekleyerek local 
 	var timeStamp = fonks.getTimeStamp(new Date());
 	degerler.humid = req.params.nem;
 	degerler.temp = req.params.sicaklik;
-
+	
+	
 	var aci = neuralnetwork.calcAngle(req.params.sicaklik,req.params.nem)
 	res.status(200).send("OK/"+ledStatus+"/"+servoaci+"/"+aci+"/");
 
-
-
-   /*
-	var sicaklik = new Sicaklik({
-		sicaklik: gelen,
-		timeStamp: timeStamp
-	})
-
-   sicaklik.save(sicaklik).then((sicaklik)=>{
-	   if(sicaklik){
-		res.status(200).send(sicaklik);
-   }
-	   
-
-   },(e)=>{
-	     res.status(404).send(e);
-   });
-   */
-
 })
-
-
-/** */
 
 app.get('/update',(req,res)=>{
 
@@ -124,32 +97,12 @@ app.get('/gunlukdurum',(req,res)=>{
 		}else{
 			res.status(400).send();
 		}
-		
-
 	},(e)=>{
 		res.status(500)
 	});
 	
-
-
 })
 
-
-
-
- /*var lul = ()=>{
-	var havaDurumu = new HavaDurumu({
-
-		sicaklik: 25 + Math.floor(Math.random() * 10) ,
-		nem: 60 + Math.floor(Math.random() * 20),
-		timeStamp :fonks.getTimeStamp(new Date())
-	
-	})
-	
-	havaDurumu.save(havaDurumu).then((hava)=>{
-			console.log(hava)
-	})
-} */
 
 
 
