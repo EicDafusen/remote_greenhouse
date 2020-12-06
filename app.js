@@ -1,18 +1,18 @@
 var express = require('express')
 var bodyParser = require('body-parser')
 var fonks = require('./fonksiyonlar')
+const port = process.env.PORT ||  3000;
 
 
 var {db}   = require('./db/connection');
 var {HavaDurumu} = require('./db/HavaDurumu');
 var neuralnetwork   = require('./neuralnetwork/build');
 
-
+//Update sık çağrıldığı için verileri sürekli veritabanından çekmemek için son okunan değerleri local'de tutuyoruz
 var degerler = {
 	temp: 0,
 	humid: 0
 }
-
 var ledStatus = 0;
 var servoaci=0 ;
 
@@ -28,28 +28,7 @@ var response = function(res,data){
 	}
 }
 
-/** Servo acisini ayarlama */
-app.get('/servo/:yeniaci',(req,res)=>{
-
-	
-	var gelen = req.params.yeniaci;
-	 servoaci = gelen;
-
-    console.log(gelen+"-degisti-"+servoaci);
-    res.status(200).send(servoaci.toString());
-	
-})
-
-/** Servo acisini alma */
-app.get('/servo',(req,res)=>{
-
-	
-
-    console.log("--istendi--"+servoaci);
-    res.status(200).send(servoaci.toString());
-	
-})
-
+//Led'in durumunu al
 app.get('/led/:status',(req,res)=>{
 
 	var status = req.params.status ;
@@ -66,28 +45,40 @@ app.get('/led/:status',(req,res)=>{
 });
 
 
-// Sensör verilerini alan endpoint
+// Sensör verilerini al
 app.get('/degerler/:sicaklik/:nem',(req,res)=>{
 
-	//Değelere time stamp ekleyerek local 
+	//Değelere time stamp ekleyerek değişkene kaydet 
 	var timeStamp = fonks.getTimeStamp(new Date());
 	degerler.humid = req.params.nem;
 	degerler.temp = req.params.sicaklik;
 	
+	//Degeleri veri tabanına kaydet
+	var durum = new HavaDurumu({
+		sicaklik : req.params.sicaklik,
+		nem:req.params.nem,
+		timeStamp
+	})
+	durum.save(durum)
+	.then(() => {
+		//sicaklik ve nem'i NN'e vererek gerekli açıyı ve ledin son durumunu yolluyor
+		var aci = neuralnetwork.calcAngle(durum.sicaklik,durum.nem)
+            	res.status(200).send("OK/"+ledStatus+"/"+servoaci+"/"+aci+"/");
+        }, (e) => {
+            cevapOlustur(res, 400, e);
+		res.status(400).send([
+        })
 	
-	var aci = neuralnetwork.calcAngle(req.params.sicaklik,req.params.nem)
-	res.status(200).send("OK/"+ledStatus+"/"+servoaci+"/"+aci+"/");
-
 })
 
+
+//En son okunan değleri al
 app.get('/update',(req,res)=>{
 
    res.status(200).send(degerler);
-   
-	
-
 });
 
+//Okunan son 10 veriyi al
 app.get('/gunlukdurum',(req,res)=>{
 
 	HavaDurumu.find().sort({_id:-1}).limit(10).then((durumlar)=>{
@@ -102,12 +93,7 @@ app.get('/gunlukdurum',(req,res)=>{
 	});
 	
 })
-
-
-
-
-
-const port = process.env.PORT ||  3000;
+			
 app.listen(port,()=>{
 
 	console.log("server is up");
