@@ -1,8 +1,5 @@
 const mongoose = require('mongoose');
 
-
-
-
 var HavaDurumuSema = new mongoose.Schema({
 
     sicaklik:{
