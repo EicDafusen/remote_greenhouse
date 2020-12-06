@@ -1,3 +1,6 @@
+ //malesef train uygun data bulamadığım için malasef geçici olarak küçük bir train datasıyla eğitiliyor
+        
+
 [
     { "input": [0.20,0.60], "output":[0]},
     { "input": [0.30,0.60], "output":[0.20]},
